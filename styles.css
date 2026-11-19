@@ -254,8 +254,11 @@ h3 {
   height: 36px;
   border-radius: 50%;
   background: var(--bg-dark);
+  border: 1px solid rgba(200, 125, 75, 0.45);
   color: var(--accent);
-  font-size: 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
 }
 
 .brand-text {
@@ -1307,8 +1310,10 @@ h3 {
 }
 
 .review-stars {
-  color: var(--accent);
-  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--accent-hover);
+  letter-spacing: 0.1em;
 }
 
 .review-card blockquote {

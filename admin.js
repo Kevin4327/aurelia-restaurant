@@ -153,19 +153,19 @@
                 </div>
                 <div style="margin-top:0.4rem; font-size:0.9rem;">
                   <strong>${escapeHtml(o.customer.name)}</strong> ·
-                  <a href="tel:${escapeHtml(o.customer.phone)}" style="color:var(--accent-hover); font-weight:700; text-decoration:underline;">📞 ${escapeHtml(o.customer.phone)}</a>
-                  ${o.customer.email ? `· <a href="mailto:${escapeHtml(o.customer.email)}" style="text-decoration:underline;">✉ ${escapeHtml(o.customer.email)}</a>` : ''}
+                  <a href="tel:${escapeHtml(o.customer.phone)}" style="color:var(--accent-hover); font-weight:700; text-decoration:underline;">Tel: ${escapeHtml(o.customer.phone)}</a>
+                  ${o.customer.email ? `· <a href="mailto:${escapeHtml(o.customer.email)}" style="text-decoration:underline;">Email: ${escapeHtml(o.customer.email)}</a>` : ''}
                 </div>
                 <div style="font-size:0.83rem; color:var(--text-muted); margin-top:0.2rem;">
-                  📍 ${escapeHtml(details.address)} · Window: ${escapeHtml(details.window || 'ASAP')}
-                  ${details.instructions ? `<br/>📝 <em>${escapeHtml(details.instructions)}</em>` : ''}
+                  Address: ${escapeHtml(details.address)} · Window: ${escapeHtml(details.window || 'ASAP')}
+                  ${details.instructions ? `<br/>Note: <em>${escapeHtml(details.instructions)}</em>` : ''}
                 </div>
               </div>
 
               <div style="text-align:right;">
                 <strong style="font-size:1.25rem;">${money(o.pricing?.total)}</strong>
                 <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(pay.method_label)}</div>
-                <a href="track.html?id=${encodeURIComponent(o.id)}" target="_blank" class="btn btn-outline btn-xs" style="margin-top:0.4rem;">Guest Tracker ↗</a>
+                <a href="track.html?id=${encodeURIComponent(o.id)}" target="_blank" class="btn btn-outline btn-xs" style="margin-top:0.4rem;">Guest Tracker</a>
               </div>
             </div>
 

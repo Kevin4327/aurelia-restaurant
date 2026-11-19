@@ -117,19 +117,20 @@
 
       const currentIdx = stages.findIndex((s) => s.key === order.status);
       const stepperEl = document.getElementById('roadmap-stepper');
+      const checkIcon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
       stepperEl.innerHTML = stages
         .map((stage, idx) => {
           let stateClass = '';
           let icon = String(idx + 1);
           if (order.status === 'cancelled') {
             stateClass = timelineByStage[stage.key] ? 'completed' : '';
-            icon = timelineByStage[stage.key] ? '✓' : String(idx + 1);
+            icon = timelineByStage[stage.key] ? checkIcon : String(idx + 1);
           } else if (order.status === 'delivered' || idx < currentIdx) {
             stateClass = 'completed';
-            icon = '✓';
+            icon = checkIcon;
           } else if (idx === currentIdx) {
             stateClass = 'active';
-            icon = '●';
+            icon = String(idx + 1);
           }
           const logEntry = timelineByStage[stage.key];
           return `

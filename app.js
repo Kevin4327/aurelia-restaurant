@@ -159,7 +159,7 @@
             <h3>Your Order</h3>
             <span class="drawer-subtitle" id="drawer-item-summary">0 items</span>
           </div>
-          <button type="button" class="icon-close-btn" id="cart-close-btn" aria-label="Close order cart">✕</button>
+          <button type="button" class="icon-close-btn" id="cart-close-btn" aria-label="Close order cart"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
 
         <div class="drawer-body-scroll">
@@ -264,13 +264,13 @@
 
       <div class="modal-backdrop hidden" id="order-modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
         <div class="modal-card" style="text-align:center;">
-          <div class="confirm-icon" aria-hidden="true">✓</div>
+          <div class="confirm-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
           <p class="eyebrow">Order Sent to Kitchen</p>
           <h2 id="order-modal-title">Order <span id="order-number"></span></h2>
           <p id="order-eta-text" style="color:var(--text-muted); margin-top:0.4rem;"></p>
           <div class="modal-summary" id="order-summary-details"></div>
           <div style="display:flex; flex-wrap:wrap; gap:0.65rem;">
-            <a href="track.html" class="btn btn-primary" id="modal-track-link" style="flex:1;">Track Live Delivery Roadmap →</a>
+            <a href="track.html" class="btn btn-primary" id="modal-track-link" style="flex:1;">Track Live Delivery Roadmap</a>
             <button type="button" class="btn btn-outline" id="close-order-modal-btn">Continue Browsing</button>
           </div>
         </div>
