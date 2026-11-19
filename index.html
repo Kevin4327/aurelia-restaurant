@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurelia — Wood-Fired Coastal Kitchen &amp; Bar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" aria-label="Aurelia Home">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text">
+          <strong>AURELIA</strong>
+          <small>Coastal Kitchen &amp; Bar</small>
+        </span>
+      </a>
+
+      <nav class="main-nav" id="main-nav" aria-label="Primary Navigation">
+        <a href="index.html" class="active">Home</a>
+        <a href="menu.html">Menu &amp; Order</a>
+        <a href="reservations.html">Reservations</a>
+        <a href="track.html">Track Delivery</a>
+        <a href="about.html">Story &amp; Visit</a>
+      </nav>
+
+      <div class="header-actions">
+        <button type="button" class="cart-trigger" id="cart-open-btn" aria-label="Open order cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span>Order</span>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+        <a href="reservations.html" class="btn btn-primary btn-sm">Book a Table</a>
+        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-media">
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1800&q=80" alt="Candlelit Aurelia dining room" class="hero-img" />
+        <div class="hero-scrim"></div>
+      </div>
+      <div class="container hero-content">
+        <div>
+          <p class="eyebrow">Est. 2019 · Mediterranean Hearth · Santa Barbara</p>
+          <h1>Wood-fired coastal fare, poured with coastal sun.</h1>
+          <p class="hero-lead">
+            Sustainably caught Pacific seafood, hand-rolled semolina pasta, and heirloom orchard produce kissed by white-oak embers every evening.
+          </p>
+          <div class="hero-ctas">
+            <a href="menu.html" class="btn btn-primary">Explore Menu &amp; Order</a>
+            <a href="reservations.html" class="btn btn-ghost">Reserve a Table</a>
+            <a href="track.html" class="btn btn-ghost">Track Delivery Roadmap</a>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat-card">
+            <span class="stat-value">4.9 ★</span>
+            <span class="stat-label">1,420+ Guest Reviews</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">650°F</span>
+            <span class="stat-label">White-Oak Hearth</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">Live</span>
+            <span class="stat-label">5-Step Order Tracking</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="pillars-grid">
+          <article class="pillar-card">
+            <div class="pillar-icon">01</div>
+            <h3>Evening Menu &amp; Cart</h3>
+            <p>Live dish pricing, descriptions, and real-time kitchen availability synced directly with our pantry.</p>
+            <a href="menu.html" class="pillar-link">Browse Full Menu →</a>
+          </article>
+          <article class="pillar-card">
+            <div class="pillar-icon">02</div>
+            <h3>Flexible Payments</h3>
+            <p>Confirm by host callback, pay at pickup/delivery, or check out via our gateway-ready card option.</p>
+            <a href="menu.html" class="pillar-link">Order Online →</a>
+          </article>
+          <article class="pillar-card">
+            <div class="pillar-icon">03</div>
+            <h3>Delivery Roadmap</h3>
+            <p>Follow every milestone from hearth firing and thermal packing to courier ETA and drop-off.</p>
+            <a href="track.html" class="pillar-link">Track an Order →</a>
+          </article>
+          <article class="pillar-card">
+            <div class="pillar-icon">04</div>
+            <h3>Table &amp; Counter Booking</h3>
+            <p>Reserve the Main Dining Room, Chef's Counter tasting bar, or heated Olive Courtyard.</p>
+            <a href="reservations.html" class="pillar-link">Book a Table →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">From Tonight's Pass</p>
+            <h2>Chef's Featured Dishes</h2>
+          </div>
+          <a href="menu.html" class="btn btn-outline btn-sm">View All Dishes &amp; Filters →</a>
+        </div>
+        <div class="menu-grid" id="featured-menu-grid"></div>
+      </div>
+    </section>
+
+    <section class="section section-dark">
+      <div class="container experience-grid">
+        <div class="experience-gallery">
+          <div class="exp-photo exp-photo-lg">
+            <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80" alt="Chef plating wood-fired Mediterranean dish" loading="lazy" />
+          </div>
+          <div class="exp-photo exp-photo-sm">
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80" alt="Charred roast over oak fire" loading="lazy" />
+          </div>
+        </div>
+
+        <div>
+          <p class="eyebrow">Chef's Philosophy</p>
+          <h2>Live embers, honest salt, and patience at the pass.</h2>
+          <p style="color: rgba(248, 244, 238, 0.8); margin-top: 1rem;">
+            Chef Elena Moretti and her culinary team build every plate around morning-landed channel seafood and heritage grains milled in Santa Ynez.
+          </p>
+
+          <div class="tasting-card">
+            <div class="tasting-header">
+              <div>
+                <span class="tasting-tag">Chef's Counter Exclusive</span>
+                <h3>Five-Course Coastal Tasting</h3>
+              </div>
+              <span class="tasting-price">$115 <small>/ guest</small></span>
+            </div>
+            <ul class="tasting-list">
+              <li><span>01</span> Crudo of Local Halibut, Blood Orange &amp; Fennel Pollen</li>
+              <li><span>02</span> Charcoal-Blistered Octopus with Smoked Chickpea Purée</li>
+              <li><span>03</span> Hand-Cut Saffron Tagliolini &amp; Santa Barbara Uni Butter</li>
+              <li><span>04</span> Oak-Roasted Branzino or Dry-Aged Ribeye Cap</li>
+              <li><span>05</span> Burnt Honey Fig Tart with Olive Oil Gelato</li>
+            </ul>
+            <div class="tasting-footer">
+              <span>Optional sommelier wine pairing +$65</span>
+              <a href="reservations.html" class="btn btn-primary btn-sm">Book Chef's Counter</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Word of Mouth</p>
+            <h2>Loved by Locals &amp; Critics</h2>
+          </div>
+          <a href="about.html" class="btn btn-outline btn-sm">Our Story &amp; Hours</a>
+        </div>
+
+        <div class="reviews-grid">
+          <article class="review-card">
+            <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <blockquote>“The charred octopus and saffron uni tagliolini taste like you're dining steps from the Amalfi shore—yet the sea breeze in the Olive Courtyard makes it unmistakably Santa Barbara.”</blockquote>
+            <footer><strong>Claire Donovan</strong><span>Coastline Culinary Journal</span></footer>
+          </article>
+          <article class="review-card">
+            <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <blockquote>“Sitting at the Chef's Counter is pure theater. Watching whole branzino hit the white-oak grill while sipping a smoked rosemary negroni is my favorite Friday ritual.”</blockquote>
+            <footer><strong>Marcus Vance</strong><span>Verified Guest · Chef's Counter</span></footer>
+          </article>
+          <article class="review-card">
+            <div class="review-stars" aria-label="5 out of 5 stars">★★★★★</div>
+            <blockquote>“Watching the live delivery roadmap from hearth firing to our doorstep was effortless, and everything arrived piping hot with chilled dressings packed separately.”</blockquote>
+            <footer><strong>Priya Nair</strong><span>Verified Online Order</span></footer>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span class="brand-text">
+            <strong>AURELIA</strong>
+            <small>Wood-Fired Coastal Kitchen &amp; Bar</small>
+          </span>
+        </div>
+        <p>Mediterranean hearth cooking crafted with wild Pacific seafood, cold-pressed California olive oils, and biodynamic wines.</p>
+      </div>
+      <div>
+        <h4>Hours</h4>
+        <ul class="footer-list">
+          <li><span>Tue – Thu</span><span>5:00 PM – 10:00 PM</span></li>
+          <li><span>Fri – Sat</span><span>4:30 PM – 11:00 PM</span></li>
+          <li><span>Sunday</span><span>4:30 PM – 9:30 PM</span></li>
+          <li><span>Monday</span><span>Closed</span></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Location &amp; Portal</h4>
+        <ul class="footer-list">
+          <li>418 State Street, Suite B, Santa Barbara</li>
+          <li><a href="tel:+18055550192">(805) 555-0192</a></li>
+          <li><a href="track.html">Track Order Roadmap</a></li>
+          <li><a href="about.html">Private Dining &amp; Hours</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="current-year"></span> Aurelia Coastal Kitchen.</span>
+      <span>PHP Backend · Live Inventory · Multi-Page Client Experience</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

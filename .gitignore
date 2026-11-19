@@ -1,0 +1,9 @@
+# Uploaded dish photos created during local testing/admin usage
+uploads/*
+!uploads/.gitkeep
+
+# Temporary / OS files
+*.log
+*.tmp.*
+.DS_Store
+Thumbs.db

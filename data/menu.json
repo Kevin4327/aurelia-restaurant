@@ -1,0 +1,295 @@
+[
+    {
+        "id": 1,
+        "sku": "STR-001",
+        "name": "Charred Octopus & Smoked Chickpea",
+        "category": "Starters",
+        "price": 22,
+        "description": "Wood-roasted Spanish octopus, warm chickpea purée, pickled fennel, and Meyer lemon chili oil.",
+        "image": "https://images.unsplash.com/photo-1551248429-40975aa4de74?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Chef's Special",
+            "Gluten-Free"
+        ],
+        "featured": true,
+        "available": true,
+        "stock": 18,
+        "low_stock_threshold": 5,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 2,
+        "sku": "STR-002",
+        "name": "Burrata & Ember-Roasted Peaches",
+        "category": "Starters",
+        "price": 19,
+        "description": "Pugliese burrata, charred stone fruit, basil oil, toasted pistachios, and grilled country sourdough.",
+        "image": "https://images.unsplash.com/photo-1608897013039-887f21d8c804?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 22,
+        "low_stock_threshold": 6,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 3,
+        "sku": "STR-003",
+        "name": "Local Halibut Crudo",
+        "category": "Starters",
+        "price": 21,
+        "description": "Channel Islands halibut shaved thin with blood orange, castelvetrano olives, sea salt, and fennel pollen.",
+        "image": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Gluten-Free"
+        ],
+        "featured": true,
+        "available": true,
+        "stock": 14,
+        "low_stock_threshold": 4,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 4,
+        "sku": "STR-004",
+        "name": "Whipped Ricotta & Heirloom Focaccia",
+        "category": "Starters",
+        "price": 15,
+        "description": "House-cultured sheep milk ricotta, rosemary sea-salt focaccia, and wildflower honeycomb.",
+        "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 25,
+        "low_stock_threshold": 6,
+        "unit": "orders",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 5,
+        "sku": "WFM-001",
+        "name": "Whole Oak-Roasted Mediterranean Branzino",
+        "category": "Wood-Fired Mains",
+        "price": 42,
+        "description": "Crispy-skin sea bass roasted over white oak with caper-lemon brown butter, charred broccolini, and herb salad.",
+        "image": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Chef's Special",
+            "Gluten-Free"
+        ],
+        "featured": true,
+        "available": true,
+        "stock": 10,
+        "low_stock_threshold": 4,
+        "unit": "fish",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 6,
+        "sku": "WFM-002",
+        "name": "Dry-Aged Prime Ribeye (14 oz)",
+        "category": "Wood-Fired Mains",
+        "price": 58,
+        "description": "28-day dry-aged ribeye seared over glowing embers with roasted bone marrow butter and crispy fingerlings.",
+        "image": "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Gluten-Free"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 8,
+        "low_stock_threshold": 3,
+        "unit": "cuts",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 7,
+        "sku": "WFM-003",
+        "name": "Hearth-Spiced Half Mary’s Chicken",
+        "category": "Wood-Fired Mains",
+        "price": 32,
+        "description": "Free-range California chicken marinated in preserved lemon, oregano, and smoked paprika with garlic jus.",
+        "image": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Gluten-Free"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 15,
+        "low_stock_threshold": 4,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 8,
+        "sku": "WFM-004",
+        "name": "Charred Cauliflower & Harissa Tahini",
+        "category": "Wood-Fired Mains",
+        "price": 27,
+        "description": "Whole-roasted romanesco & heirloom cauliflower steak over saffron tahini, pomegranate, and toasted pine nuts.",
+        "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian",
+            "Gluten-Free"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 16,
+        "low_stock_threshold": 5,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 9,
+        "sku": "PST-001",
+        "name": "Saffron Tagliolini & Santa Barbara Uni",
+        "category": "Artisanal Pasta",
+        "price": 36,
+        "description": "Hand-cut saffron egg pasta folded with local sea urchin emulsion, Meyer lemon zest, and toasted pangrattato.",
+        "image": "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Chef's Special"
+        ],
+        "featured": true,
+        "available": true,
+        "stock": 12,
+        "low_stock_threshold": 4,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 10,
+        "sku": "PST-002",
+        "name": "Wild Mushroom & Black Truffle Agnolotti",
+        "category": "Artisanal Pasta",
+        "price": 31,
+        "description": "Delicate pasta parcels stuffed with chanterelles and mascarpone, finished in aged parmigiano-truffle crema.",
+        "image": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 19,
+        "low_stock_threshold": 5,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 11,
+        "sku": "PST-003",
+        "name": "Spicy Nduja & Coastal Prawn Rigatoni",
+        "category": "Artisanal Pasta",
+        "price": 33,
+        "description": "Bronze-die extruded rigatoni tossed with San Marzano tomatoes, Calabrian chili, sweet prawns, and basil.",
+        "image": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80",
+        "badges": [],
+        "featured": false,
+        "available": true,
+        "stock": 20,
+        "low_stock_threshold": 5,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 12,
+        "sku": "DES-001",
+        "name": "Burnt Honey & Black Mission Fig Tart",
+        "category": "Desserts",
+        "price": 15,
+        "description": "Warm almond frangipane tart glazed with coastal wildflower honey and served with cold-pressed olive oil gelato.",
+        "image": "https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian",
+            "Chef's Special"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 14,
+        "low_stock_threshold": 4,
+        "unit": "slices",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 13,
+        "sku": "DES-002",
+        "name": "Espresso Tiramisu al Cucchiaio",
+        "category": "Desserts",
+        "price": 14,
+        "description": "Savoiardi soaked in dark roast espresso and Marsala, layered with whipped mascarpone and Valrhona cocoa.",
+        "image": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 16,
+        "low_stock_threshold": 4,
+        "unit": "portions",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 14,
+        "sku": "DRK-001",
+        "name": "Smoked Rosemary Negroni",
+        "category": "Cocktails",
+        "price": 18,
+        "description": "Botanical gin, Campari, blood orange vermouth, and rosemary smoke over a hand-carved crystal block.",
+        "image": "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Gluten-Free",
+            "Chef's Special"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 30,
+        "low_stock_threshold": 8,
+        "unit": "cocktails",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 15,
+        "sku": "DRK-002",
+        "name": "Amalfi Citrus Spritz",
+        "category": "Cocktails",
+        "price": 16,
+        "description": "Bergamot liqueur, organic prosecco, crushed thyme, and sparkling Mediterranean grapefruit soda.",
+        "image": "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian",
+            "Gluten-Free"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 32,
+        "low_stock_threshold": 8,
+        "unit": "cocktails",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    },
+    {
+        "id": 16,
+        "sku": "DRK-003",
+        "name": "Zero-Proof Blood Orange & Fig Tonic",
+        "category": "Cocktails",
+        "price": 12,
+        "description": "Cold-pressed California blood orange, fig leaf cordial, cardamom bitters, and crisp botanical tonic.",
+        "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=80",
+        "badges": [
+            "Vegetarian",
+            "Gluten-Free"
+        ],
+        "featured": false,
+        "available": true,
+        "stock": 40,
+        "low_stock_threshold": 10,
+        "unit": "drinks",
+        "updated_at": "2026-11-19T12:28:15+00:00"
+    }
+]

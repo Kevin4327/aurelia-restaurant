@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Delivery Roadmap — Aurelia Coastal Kitchen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text"><strong>AURELIA</strong><small>Coastal Kitchen &amp; Bar</small></span>
+      </a>
+      <nav class="main-nav" id="main-nav">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu &amp; Order</a>
+        <a href="reservations.html">Reservations</a>
+        <a href="track.html" class="active">Track Delivery</a>
+        <a href="about.html">Story &amp; Visit</a>
+      </nav>
+      <div class="header-actions">
+        <button type="button" class="cart-trigger" id="cart-open-btn" aria-label="Open order cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span>Order</span>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+        <a href="menu.html" class="btn btn-primary btn-sm">New Order</a>
+        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container page-hero-row">
+      <div>
+        <p class="eyebrow">Live Fulfillment Roadmap</p>
+        <h1>Track Your Order &amp; Delivery</h1>
+        <p class="lead">Follow real-time kitchen milestones from hearth firing and thermal packing to courier drop-off—auto-refreshing every 6 seconds.</p>
+      </div>
+      <a href="menu.html" class="btn btn-ghost btn-sm">Order More Dishes →</a>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container">
+      <form class="track-search-bar" id="track-search-form">
+        <input type="text" id="track-order-input" placeholder="Enter Order ID (e.g. AUR-1001)" aria-label="Order ID" />
+        <button type="submit" class="btn btn-primary">Track Order</button>
+      </form>
+
+      <div class="sample-order-chips">
+        <span>Recent / Sample Orders:</span>
+        <div id="recent-order-chips" style="display:flex; flex-wrap:wrap; gap:0.45rem;"></div>
+      </div>
+
+      <div class="card-panel hidden" id="track-error" style="border-color:var(--danger); color:var(--danger);"></div>
+
+      <div class="tracker-grid hidden" id="track-result">
+        <div class="card-panel">
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:1.1rem;">
+            <div>
+              <h2 id="track-order-title">Order</h2>
+              <p id="track-order-meta" style="margin:0.25rem 0 0; font-size:0.88rem; color:var(--text-muted);"></p>
+            </div>
+            <span class="badge" id="track-payment-badge"></span>
+          </div>
+
+          <div class="courier-banner" id="track-courier-banner"></div>
+
+          <h3 style="margin-bottom:0.25rem;">Delivery Roadmap</h3>
+          <div class="roadmap-stepper" id="roadmap-stepper"></div>
+
+          <div class="timeline-feed">
+            <h4 style="font-family:var(--font-sans); font-size:0.86rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">
+              Kitchen &amp; Courier Messages
+            </h4>
+            <div id="track-notes-feed" style="display:grid; gap:0.5rem;"></div>
+
+            <form id="customer-note-form" style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+              <input type="text" id="customer-note-input" placeholder="Send gate code, delivery tip, or request callback..." style="flex:1; padding:0.65rem 0.85rem; border:1px solid var(--border); border-radius:8px; background:var(--bg-cream);" />
+              <button type="submit" class="btn btn-dark btn-sm">Send Note</button>
+            </form>
+          </div>
+        </div>
+
+        <aside class="card-panel">
+          <h3 style="margin-bottom:1rem;">Order &amp; Payment Receipt</h3>
+          <div id="track-receipt-body"></div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom" style="padding-top:0;">
+      <span>© <span id="current-year"></span> Aurelia Coastal Kitchen.</span>
+      <span>Need immediate help? Call (805) 555-0192</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="track.js"></script>
+</body>
+</html>

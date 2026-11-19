@@ -1,0 +1,19 @@
+{
+    "restaurant_name": "Aurelia — Wood-Fired Coastal Kitchen & Bar",
+    "accepting_orders": true,
+    "prep_time_min": 20,
+    "delivery_eta_min": 35,
+    "delivery_fee": 4.5,
+    "tax_rate": 0.0875,
+    "contact_phone": "(805) 555-0192",
+    "contact_email": "hello@aureliakitchen.com",
+    "payment_gateway": {
+        "enabled": true,
+        "provider": "stripe_ready",
+        "mode": "sandbox",
+        "label": "Card / Digital Wallet (Gateway Ready)",
+        "public_key": "pk_test_aurelia_demo_connect_later",
+        "webhook_url": "https://yourdomain.com/api.php?action=gateway_webhook",
+        "checkout_note": "Demo test checkout enabled now; swap in live Stripe, PayHere, or custom gateway keys anytime in Admin."
+    }
+}

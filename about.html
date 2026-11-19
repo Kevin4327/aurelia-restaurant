@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Story, Hours &amp; Private Dining — Aurelia Coastal Kitchen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span class="brand-text"><strong>AURELIA</strong><small>Coastal Kitchen &amp; Bar</small></span>
+      </a>
+      <nav class="main-nav" id="main-nav">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu &amp; Order</a>
+        <a href="reservations.html">Reservations</a>
+        <a href="track.html">Track Delivery</a>
+        <a href="about.html" class="active">Story &amp; Visit</a>
+      </nav>
+      <div class="header-actions">
+        <button type="button" class="cart-trigger" id="cart-open-btn" aria-label="Open order cart">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
+          <span>Order</span>
+          <span class="cart-badge" id="cart-count">0</span>
+        </button>
+        <a href="reservations.html" class="btn btn-primary btn-sm">Book a Table</a>
+        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle navigation" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Santa Barbara · Since 2019</p>
+      <h1>Our Hearth, Team &amp; Hospitality</h1>
+      <p class="lead">Rooted in Central Coast agriculture, sustainable channel fisheries, and slow Mediterranean wood-fire technique.</p>
+    </div>
+  </section>
+
+  <main class="section">
+    <div class="container reservations-layout">
+      <div class="card-panel">
+        <p class="eyebrow">The Kitchen</p>
+        <h2>Chef Elena Moretti &amp; The Open Hearth</h2>
+        <p style="margin-top:0.9rem;">
+          Opened in 2019 just blocks from the harbor, Aurelia centers around a custom 650°F white-oak hearth built by Santa Barbara stonemasons. Every morning begins with channel-boat deliveries of halibut, rockfish, and sea urchin paired with biodynamic produce from Carpinteria and Santa Ynez farms.
+        </p>
+        <p>
+          Whether dining at our 8-seat Chef's Counter, hosting an intimate gathering in the Olive Courtyard, or ordering online with live delivery tracking, our promise stays unchanged: honest coastal ingredients treated with restraint and warmth.
+        </p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.75rem; padding-top:1.25rem; border-top:1px solid var(--border);">
+          <div>
+            <h4>Hours</h4>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin:0.4rem 0 0;">
+              Tue – Thu: 5:00 PM – 10:00 PM<br />
+              Fri – Sat: 4:30 PM – 11:00 PM<br />
+              Sunday: 4:30 PM – 9:30 PM<br />
+              Monday: Closed
+            </p>
+          </div>
+          <div>
+            <h4>Visit &amp; Direct Line</h4>
+            <p style="font-size:0.9rem; color:var(--text-muted); margin:0.4rem 0 0;">
+              418 State Street, Suite B<br />
+              Santa Barbara, CA 93101<br />
+              <a href="tel:+18055550192" style="font-weight:700; color:var(--accent-hover);">(805) 555-0192</a><br />
+              hello@aureliakitchen.com
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="card-panel">
+        <p class="eyebrow">Private Events &amp; Catering</p>
+        <h3>Send an Inquiry</h3>
+        <p style="font-size:0.86rem; color:var(--text-muted); margin:0.4rem 0 1.1rem;">
+          Hosting a rehearsal dinner, corporate buyout, or coastal catering? Our events coordinator will follow up promptly with availability and menu options.
+        </p>
+        <form id="inquiry-form">
+          <div class="form-field">
+            <label for="inq-name">Your Name *</label>
+            <input type="text" id="inq-name" required placeholder="Jordan Ellis" />
+          </div>
+          <div class="form-field">
+            <label for="inq-phone">Phone *</label>
+            <input type="tel" id="inq-phone" required placeholder="(805) 555-0199" />
+          </div>
+          <div class="form-field">
+            <label for="inq-email">Email</label>
+            <input type="email" id="inq-email" placeholder="jordan@example.com" />
+          </div>
+          <div class="form-field">
+            <label for="inq-topic">Inquiry Topic</label>
+            <select id="inq-topic">
+              <option value="Private Dining">Private Dining (Olive Courtyard)</option>
+              <option value="Catering">Off-Site Coastal Catering</option>
+              <option value="General Feedback">General Question / Feedback</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="inq-message">Details *</label>
+            <textarea id="inq-message" rows="3" required placeholder="Estimated guest count, preferred date, menu notes..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Send Inquiry</button>
+          <p id="inquiry-status" style="font-size:0.86rem; font-weight:600; margin:0.65rem 0 0;"></p>
+        </form>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom" style="padding-top:0;">
+      <span>© <span id="current-year"></span> Aurelia Coastal Kitchen.</span>
+      <span><a href="menu.html">Order Online</a> · <a href="reservations.html">Book a Table</a></span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

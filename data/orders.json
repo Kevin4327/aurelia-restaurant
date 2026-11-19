@@ -1,0 +1,144 @@
+[
+    {
+        "id": "AUR-1001",
+        "created_at": "2026-11-19T11:51:35+00:00",
+        "updated_at": "2026-11-19T12:23:15+00:00",
+        "customer": {
+            "name": "Sophia Morales",
+            "phone": "(805) 555-0134",
+            "email": "sophia.m@example.com"
+        },
+        "fulfillment_mode": "delivery",
+        "delivery_details": {
+            "address": "214 Castillo St, Apt 3B, Santa Barbara",
+            "instructions": "Gate code #4419. Please ring bell on arrival.",
+            "window": "ASAP (~35 mins)",
+            "courier_name": "Mateo R.",
+            "eta_minutes": 12
+        },
+        "items": [
+            {
+                "id": 1,
+                "name": "Charred Octopus & Smoked Chickpea",
+                "price": 22,
+                "qty": 1
+            },
+            {
+                "id": 9,
+                "name": "Saffron Tagliolini & Santa Barbara Uni",
+                "price": 36,
+                "qty": 1
+            }
+        ],
+        "pricing": {
+            "subtotal": 58,
+            "promo_code": "AURELIA10",
+            "discount": 5.8,
+            "delivery_fee": 4.5,
+            "tip": 8,
+            "tax": 4.57,
+            "total": 69.27
+        },
+        "payment": {
+            "method": "gateway_card",
+            "method_label": "Online Card / Gateway",
+            "status": "paid_online",
+            "provider": "stripe_ready",
+            "transaction_id": "GW-DEMO88412A",
+            "card_last4": "4242"
+        },
+        "status": "out_for_delivery",
+        "timeline": [
+            {
+                "stage": "received",
+                "label": "Order Received",
+                "at": "2026-11-19T11:51:35+00:00",
+                "note": "Paid online via gateway demo (•••• 4242)."
+            },
+            {
+                "stage": "preparing",
+                "label": "Cooking on the Hearth",
+                "at": "2026-11-19T12:03:15+00:00",
+                "note": "Octopus and uni tagliolini fired by Chef Elena."
+            },
+            {
+                "stage": "packing",
+                "label": "Packed for Transit",
+                "at": "2026-11-19T12:14:55+00:00",
+                "note": "Thermal sealed; lemon oil packed separately."
+            },
+            {
+                "stage": "out_for_delivery",
+                "label": "Out for Delivery",
+                "at": "2026-11-19T12:23:15+00:00",
+                "note": "Courier Mateo R. departed restaurant (ETA ~12 min)."
+            }
+        ],
+        "staff_notes": [
+            {
+                "at": "2026-11-19T12:03:15+00:00",
+                "author": "Host Desk",
+                "text": "Confirmed gate code #4419 via SMS with Sophia."
+            }
+        ]
+    },
+    {
+        "id": "AUR-1002",
+        "created_at": "2026-11-19T12:18:15+00:00",
+        "updated_at": "2026-11-19T12:18:15+00:00",
+        "customer": {
+            "name": "Daniel Park",
+            "phone": "(805) 555-0177",
+            "email": "dpark@example.com"
+        },
+        "fulfillment_mode": "pickup",
+        "delivery_details": {
+            "address": "Curbside Pickup — 418 State St",
+            "instructions": "Silver Volvo at Haley St bay — please call when ready.",
+            "window": "7:15 PM",
+            "courier_name": "",
+            "eta_minutes": 18
+        },
+        "items": [
+            {
+                "id": 5,
+                "name": "Whole Oak-Roasted Mediterranean Branzino",
+                "price": 42,
+                "qty": 1
+            },
+            {
+                "id": 12,
+                "name": "Burnt Honey & Black Mission Fig Tart",
+                "price": 15,
+                "qty": 2
+            }
+        ],
+        "pricing": {
+            "subtotal": 72,
+            "promo_code": "",
+            "discount": 0,
+            "delivery_fee": 0,
+            "tip": 7.2,
+            "tax": 6.3,
+            "total": 85.5
+        },
+        "payment": {
+            "method": "reach_out",
+            "method_label": "Pay on Confirmation (Staff Reaches Out)",
+            "status": "pending_contact",
+            "provider": "manual_reachout",
+            "transaction_id": "",
+            "card_last4": ""
+        },
+        "status": "received",
+        "timeline": [
+            {
+                "stage": "received",
+                "label": "Order Received",
+                "at": "2026-11-19T12:18:15+00:00",
+                "note": "Awaiting staff callback/SMS to confirm payment & pickup time."
+            }
+        ],
+        "staff_notes": []
+    }
+]

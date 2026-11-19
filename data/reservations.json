@@ -1,0 +1,28 @@
+[
+    {
+        "id": "RES-8410",
+        "date": "2026-11-19",
+        "time": "19:00",
+        "guests": 4,
+        "seating": "Olive Courtyard",
+        "name": "Elena & Julian Ward",
+        "phone": "(805) 555-0181",
+        "email": "ward.family@example.com",
+        "notes": "Anniversary dinner, outdoor heater requested.",
+        "status": "Confirmed",
+        "created_at": "2026-11-19T10:58:15+00:00"
+    },
+    {
+        "id": "RES-8415",
+        "date": "2026-11-19",
+        "time": "20:30",
+        "guests": 2,
+        "seating": "Chef's Counter",
+        "name": "Aarav Patel",
+        "phone": "(805) 555-0129",
+        "email": "aarav.p@example.com",
+        "notes": "Five-Course Coastal Tasting",
+        "status": "Confirmed",
+        "created_at": "2026-11-19T11:34:55+00:00"
+    }
+]
