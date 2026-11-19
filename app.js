@@ -8,6 +8,9 @@
   const STORAGE_CART_KEY = 'aurelia_cart_v2';
   const STORAGE_ORDERS_KEY = 'aurelia_recent_orders_v2';
   const STORAGE_RES_KEY = 'aurelia_my_reservations_v2';
+  const STORAGE_STATIC_DB = 'aurelia_static_db_v1';
+  const DEMO_ADMIN_TOKEN = 'aurelia2026';
+  let useStaticFallback = window.location.protocol === 'file:';
 
   const FALLBACK_IMG =
     "data:image/svg+xml;utf8," +
@@ -88,20 +91,427 @@
     showToast._timer = setTimeout(() => toast.classList.add('hidden'), 3200);
   }
 
+  function getRoadmapStages(mode = 'delivery') {
+    if (mode === 'pickup') {
+      return [
+        { key: 'received', label: 'Order Received', detail: 'Kitchen logged your ticket and notified the host stand.' },
+        { key: 'preparing', label: 'Cooking on the Hearth', detail: 'Chefs are firing your dishes fresh over white oak.' },
+        { key: 'packing', label: 'Quality & Packing', detail: 'Checking dish temperatures, garnishes, and warm bread.' },
+        { key: 'ready_for_pickup', label: 'Ready for Pickup', detail: 'Waiting at the State Street host stand / curbside bay.' },
+        { key: 'delivered', label: 'Picked Up', detail: 'Order handed off — enjoy your evening!' },
+      ];
+    }
+    return [
+      { key: 'received', label: 'Order Received', detail: 'Ticket confirmed and queued for the kitchen pass.' },
+      { key: 'preparing', label: 'Cooking on the Hearth', detail: 'Chefs are grilling and plating your order fresh.' },
+      { key: 'packing', label: 'Packed for Transit', detail: 'Sealed in insulated thermal boxes with chilled dressings separate.' },
+      { key: 'out_for_delivery', label: 'Out for Delivery', detail: 'Aurelia courier is on the way to your drop-off point.' },
+      { key: 'delivered', label: 'Delivered', detail: 'Delivered to your door — thank you for ordering!' },
+    ];
+  }
+
+  async function ensureStaticDb() {
+    let db = loadJson(STORAGE_STATIC_DB, null);
+    if (db && Array.isArray(db.menu) && db.menu.length > 0) {
+      return db;
+    }
+
+    const fetchStaticJson = async (path, fallback) => {
+      try {
+        const res = await fetch(path);
+        if (!res.ok) return fallback;
+        return await res.json();
+      } catch {
+        return fallback;
+      }
+    };
+
+    const [menu, orders, reservations, inventory_log, settings, inquiries] = await Promise.all([
+      fetchStaticJson('data/menu.json', []),
+      fetchStaticJson('data/orders.json', []),
+      fetchStaticJson('data/reservations.json', []),
+      fetchStaticJson('data/inventory_log.json', []),
+      fetchStaticJson('data/settings.json', state.settings),
+      fetchStaticJson('data/inquiries.json', []),
+    ]);
+
+    db = { menu, orders, reservations, inventory_log, settings, inquiries };
+    saveJson(STORAGE_STATIC_DB, db);
+    return db;
+  }
+
+  function assertStaticAdmin(token) {
+    if (token !== DEMO_ADMIN_TOKEN) {
+      const err = new Error('Unauthorized: Invalid staff passkey.');
+      err.status = 401;
+      throw err;
+    }
+  }
+
+  async function localApiFallback(rawAction, options = {}) {
+    const { method = 'GET', body = null, token = '', isFormData = false } = options;
+    const ampIdx = rawAction.indexOf('&');
+    const action = ampIdx === -1 ? rawAction : rawAction.slice(0, ampIdx);
+    const params = new URLSearchParams(ampIdx === -1 ? '' : rawAction.slice(ampIdx + 1));
+    const db = await ensureStaticDb();
+    const now = new Date().toISOString();
+
+    if (method === 'GET') {
+      if (action === 'ping') return { success: true, mode: 'static' };
+      if (action === 'menu') return { success: true, items: db.menu, settings: db.settings };
+
+      if (action === 'track') {
+        const orderId = (params.get('id') || '').trim().toUpperCase();
+        const found = (db.orders || []).find((o) => String(o.id).toUpperCase() === orderId);
+        if (!found) throw new Error(`Order ${orderId} was not found.`);
+        return { success: true, order: found, stages: getRoadmapStages(found.fulfillment_mode) };
+      }
+
+      if (action === 'reservation_lookup') {
+        const wanted = (params.get('ids') || '')
+          .split(',')
+          .map((s) => s.trim().toUpperCase())
+          .filter(Boolean);
+        const matched = (db.reservations || []).filter((r) => wanted.includes(String(r.id).toUpperCase()));
+        return { success: true, reservations: matched };
+      }
+
+      if (action === 'admin_bootstrap') {
+        assertStaticAdmin(token);
+        let gross = 0;
+        let paid = 0;
+        let pending = 0;
+        let active = 0;
+        (db.orders || []).forEach((o) => {
+          const total = Number(o.pricing?.total || 0);
+          const pStat = o.payment?.status || 'pending_contact';
+          if (o.status !== 'cancelled') {
+            gross += total;
+            if (pStat === 'paid_online' || pStat === 'paid_in_person') paid += total;
+            else if (pStat !== 'refunded') pending += total;
+            if (o.status !== 'delivered') active++;
+          }
+        });
+        let low = 0;
+        let out = 0;
+        (db.menu || []).forEach((m) => {
+          if (Number(m.stock) <= 0 || !m.available) out++;
+          else if (Number(m.stock) <= Number(m.low_stock_threshold || 5)) low++;
+        });
+        return {
+          success: true,
+          menu: db.menu,
+          orders: db.orders,
+          reservations: db.reservations,
+          inventory_log: db.inventory_log,
+          inquiries: db.inquiries,
+          settings: db.settings,
+          roadmap_meta: {
+            delivery: getRoadmapStages('delivery'),
+            pickup: getRoadmapStages('pickup'),
+          },
+          metrics: {
+            gross_revenue: Number(gross.toFixed(2)),
+            paid_revenue: Number(paid.toFixed(2)),
+            pending_revenue: Number(pending.toFixed(2)),
+            active_orders: active,
+            total_orders: db.orders.length,
+            low_stock_count: low,
+            out_of_stock_count: out,
+            reservations_count: db.reservations.length,
+          },
+        };
+      }
+      throw new Error('Unknown GET action.');
+    }
+
+    // POST actions in static mode
+    if (action === 'upload_image' && isFormData) {
+      assertStaticAdmin(token);
+      const file = body.get('image');
+      if (!file) throw new Error('No image selected.');
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Failed to read image file.'));
+        reader.readAsDataURL(file);
+      });
+      return { success: true, url: dataUrl };
+    }
+
+    const payload = body || {};
+
+    if (action === 'admin_login') {
+      if (payload.passkey !== DEMO_ADMIN_TOKEN) {
+        const err = new Error('Invalid passkey. Try aurelia2026 for demo access.');
+        err.status = 401;
+        throw err;
+      }
+      return { success: true, token: DEMO_ADMIN_TOKEN };
+    }
+
+    if (action === 'order_create') {
+      const c = payload.customer || {};
+      if (!c.name || !c.phone) throw new Error('Customer name and phone number are required.');
+      const mode = payload.fulfillment_mode === 'delivery' ? 'delivery' : 'pickup';
+      if (mode === 'delivery' && !payload.delivery?.address) {
+        throw new Error('Delivery street address is required.');
+      }
+      const reqItems = payload.items || [];
+      if (!reqItems.length) throw new Error('Your cart is empty.');
+
+      let subtotal = 0;
+      const orderItems = [];
+      const deductions = [];
+      reqItems.forEach((req) => {
+        const idx = db.menu.findIndex((m) => Number(m.id) === Number(req.id));
+        if (idx === -1) throw new Error(`Menu item #${req.id} not found.`);
+        const dish = db.menu[idx];
+        const qty = Math.max(1, Number(req.qty || 1));
+        if (!dish.available || Number(dish.stock) <= 0) throw new Error(`${dish.name} is sold out.`);
+        if (Number(dish.stock) < qty) throw new Error(`Only ${dish.stock} left of ${dish.name}.`);
+        subtotal += Number(dish.price) * qty;
+        orderItems.push({ id: dish.id, sku: dish.sku || '', name: dish.name, price: Number(dish.price), qty });
+        db.menu[idx].stock = Number(dish.stock) - qty;
+        if (db.menu[idx].stock <= 0) {
+          db.menu[idx].stock = 0;
+          db.menu[idx].available = false;
+        }
+        deductions.push({ item_id: dish.id, item_name: dish.name, delta: -qty, new_stock: db.menu[idx].stock });
+      });
+
+      const code = String(payload.promo_code || '').toUpperCase();
+      const rate = code === 'AURELIA10' ? 0.1 : code === 'WELCOME15' ? 0.15 : 0;
+      const discount = Number((subtotal * rate).toFixed(2));
+      const deliveryFee = mode === 'delivery' ? Number(db.settings.delivery_fee ?? 4.5) : 0;
+      const tip = Math.max(0, Number(payload.tip || 0));
+      const tax = Number((Math.max(0, subtotal - discount) * Number(db.settings.tax_rate ?? 0.0875)).toFixed(2));
+      const total = Number((Math.max(0, subtotal - discount) + deliveryFee + tip + tax).toFixed(2));
+
+      const pm = payload.payment_method || 'reach_out';
+      const payment = {
+        method: pm,
+        method_label:
+          pm === 'gateway_card'
+            ? db.settings.payment_gateway?.label || 'Online Card / Gateway'
+            : pm === 'pay_on_arrival'
+            ? mode === 'delivery'
+              ? 'Cash or Card on Delivery'
+              : 'Cash or Card at Pickup'
+            : 'Pay on Confirmation (Staff Reaches Out)',
+        status: pm === 'gateway_card' ? 'paid_online' : pm === 'pay_on_arrival' ? 'pay_on_arrival' : 'pending_contact',
+        provider: pm === 'gateway_card' ? db.settings.payment_gateway?.provider || 'stripe_ready' : 'manual',
+        transaction_id: pm === 'gateway_card' ? 'GW-' + Math.random().toString(16).slice(2, 12).toUpperCase() : '',
+        card_last4: pm === 'gateway_card' ? String(payload.gateway_payload?.card_last4 || '4242').slice(-4) : '',
+      };
+
+      const maxNum = db.orders.reduce((acc, o) => {
+        const m = String(o.id).match(/AUR-(\d+)/);
+        return m ? Math.max(acc, Number(m[1])) : acc;
+      }, 1000);
+      const orderId = `AUR-${maxNum + 1}`;
+      const newOrder = {
+        id: orderId,
+        created_at: now,
+        updated_at: now,
+        customer: c,
+        fulfillment_mode: mode,
+        delivery_details: {
+          address: mode === 'delivery' ? payload.delivery.address : 'Curbside Pickup — 418 State St',
+          instructions: payload.delivery?.instructions || '',
+          window: payload.delivery?.window || 'ASAP',
+          courier_name: '',
+          eta_minutes: mode === 'delivery' ? Number(db.settings.delivery_eta_min || 35) : Number(db.settings.prep_time_min || 20),
+        },
+        items: orderItems,
+        pricing: { subtotal: Number(subtotal.toFixed(2)), promo_code: rate ? code : '', discount, delivery_fee: deliveryFee, tip, tax, total },
+        payment,
+        status: 'received',
+        timeline: [{ stage: 'received', label: 'Order Received', at: now, note: 'Order received via storefront.' }],
+        staff_notes: [],
+      };
+
+      db.orders.unshift(newOrder);
+      deductions.forEach((d) =>
+        db.inventory_log.unshift({ at: now, ...d, reason: 'Order Deduction', reference: orderId })
+      );
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, order: newOrder, stages: getRoadmapStages(mode) };
+    }
+
+    if (action === 'order_customer_note') {
+      const ord = db.orders.find((o) => String(o.id).toUpperCase() === String(payload.order_id || '').toUpperCase());
+      if (!ord) throw new Error('Order not found.');
+      ord.staff_notes.push({ at: now, author: 'Customer', text: String(payload.note || '') });
+      ord.updated_at = now;
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, order: ord };
+    }
+
+    if (action === 'reservation_create') {
+      const resObj = {
+        id: `RES-${Math.floor(1000 + Math.random() * 9000)}`,
+        ...payload,
+        status: 'Confirmed',
+        created_at: now,
+      };
+      db.reservations.unshift(resObj);
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, reservation: resObj };
+    }
+
+    if (action === 'inquiry_create') {
+      const inq = { id: `INQ-${Math.floor(1000 + Math.random() * 9000)}`, ...payload, created_at: now };
+      db.inquiries.unshift(inq);
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, inquiry: inq };
+    }
+
+    assertStaticAdmin(token);
+
+    if (action === 'order_update') {
+      const ord = db.orders.find((o) => String(o.id).toUpperCase() === String(payload.order_id || '').toUpperCase());
+      if (!ord) throw new Error('Order not found.');
+      const prevStatus = ord.status;
+      if (payload.courier_name !== undefined) ord.delivery_details.courier_name = payload.courier_name;
+      if (payload.eta_minutes !== undefined && payload.eta_minutes !== '') ord.delivery_details.eta_minutes = Number(payload.eta_minutes);
+      if (payload.payment_status) ord.payment.status = payload.payment_status;
+      if (payload.reach_out_note) ord.staff_notes.push({ at: now, author: 'Staff Outreach', text: payload.reach_out_note });
+
+      const nextStatus = payload.status || prevStatus;
+      if (nextStatus !== prevStatus || payload.stage_note) {
+        if (nextStatus === 'cancelled' && prevStatus !== 'cancelled') {
+          ord.items.forEach((oi) => {
+            const dish = db.menu.find((m) => Number(m.id) === Number(oi.id));
+            if (dish) {
+              dish.stock = Number(dish.stock) + Number(oi.qty);
+              if (dish.stock > 0) dish.available = true;
+              db.inventory_log.unshift({ at: now, item_id: dish.id, item_name: dish.name, delta: oi.qty, new_stock: dish.stock, reason: 'Order Cancelled Restock', reference: ord.id });
+            }
+          });
+        }
+        const stages = [...getRoadmapStages(ord.fulfillment_mode), { key: 'cancelled', label: 'Order Cancelled' }];
+        const match = stages.find((s) => s.key === nextStatus);
+        ord.status = nextStatus;
+        ord.timeline.push({ stage: nextStatus, label: match ? match.label : nextStatus, at: now, note: payload.stage_note || 'Status updated.' });
+      }
+      ord.updated_at = now;
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, order: ord };
+    }
+
+    if (action === 'menu_save') {
+      const itemData = payload.item || payload;
+      const id = Number(itemData.id || 0);
+      const stock = Math.max(0, Number(itemData.stock ?? 15));
+      const clean = {
+        ...itemData,
+        id,
+        price: Number(itemData.price),
+        stock,
+        available: stock === 0 ? false : Boolean(itemData.available),
+        badges: Array.isArray(itemData.badges)
+          ? itemData.badges
+          : String(itemData.badges || '')
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean),
+        updated_at: now,
+      };
+      const idx = db.menu.findIndex((m) => Number(m.id) === id);
+      if (idx >= 0) {
+        db.menu[idx] = clean;
+      } else {
+        clean.id = db.menu.reduce((max, m) => Math.max(max, Number(m.id)), 0) + 1;
+        db.menu.unshift(clean);
+      }
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, item: clean, menu: db.menu };
+    }
+
+    if (action === 'menu_delete') {
+      db.menu = db.menu.filter((m) => Number(m.id) !== Number(payload.id));
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, menu: db.menu };
+    }
+
+    if (action === 'inventory_adjust') {
+      const dish = db.menu.find((m) => Number(m.id) === Number(payload.id));
+      if (!dish) throw new Error('Dish not found.');
+      const prev = Number(dish.stock);
+      const next = Math.max(0, prev + Number(payload.delta || 0));
+      dish.stock = next;
+      dish.available = next > 0;
+      db.inventory_log.unshift({ at: now, item_id: dish.id, item_name: dish.name, delta: next - prev, new_stock: next, reason: payload.reason || 'Manual Adjustment', reference: 'INV-CTRL' });
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, item: dish, menu: db.menu };
+    }
+
+    if (action === 'reservation_update') {
+      const resObj = db.reservations.find((r) => r.id === payload.id);
+      if (!resObj) throw new Error('Reservation not found.');
+      resObj.status = payload.status;
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, reservation: resObj };
+    }
+
+    if (action === 'settings_save') {
+      const incoming = payload.settings || payload;
+      db.settings = {
+        ...db.settings,
+        ...incoming,
+        payment_gateway: { ...(db.settings.payment_gateway || {}), ...(incoming.payment_gateway || {}) },
+      };
+      saveJson(STORAGE_STATIC_DB, db);
+      return { success: true, settings: db.settings };
+    }
+
+    throw new Error('Unknown POST action.');
+  }
+
   async function apiRequest(action, options = {}) {
-    const { method = 'GET', body = null } = options;
+    const { method = 'GET', body = null, token = '', isFormData = false } = options;
+    if (useStaticFallback) {
+      return localApiFallback(action, options);
+    }
+
     const url = `api.php?action=${encodeURIComponent(action)}`;
-    const fetchOpts = { method, headers: {} };
+    const headers = {};
+    if (token) headers['X-Admin-Token'] = token;
+    const fetchOpts = { method, headers };
     if (body !== null) {
-      fetchOpts.headers['Content-Type'] = 'application/json';
-      fetchOpts.body = JSON.stringify(body);
+      if (isFormData) {
+        fetchOpts.body = body;
+      } else {
+        headers['Content-Type'] = 'application/json';
+        fetchOpts.body = JSON.stringify(body);
+      }
     }
-    const res = await fetch(url, fetchOpts);
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || data.success === false) {
-      throw new Error(data.error || `Request failed (${res.status})`);
+
+    try {
+      const res = await fetch(url, fetchOpts);
+      const text = await res.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Static hosting (e.g. GitHub Pages) returns raw PHP text or HTML 405 page
+        useStaticFallback = true;
+        return localApiFallback(action, options);
+      }
+      if (!res.ok || data.success === false) {
+        const err = new Error(data.error || `Request failed (${res.status})`);
+        err.status = res.status;
+        throw err;
+      }
+      return data;
+    } catch (err) {
+      if (err && typeof err.status === 'number') {
+        throw err;
+      }
+      useStaticFallback = true;
+      return localApiFallback(action, options);
     }
-    return data;
   }
 
   // Expose lightweight helpers for track.js & admin.js
@@ -122,7 +532,7 @@
     const banner = document.createElement('div');
     banner.className = 'file-mode-banner';
     banner.innerHTML =
-      'Previewing static files via <code>file://</code>. To enable live PHP orders, menu CMS, inventory &amp; tracking, run <code>php -S 127.0.0.1:8080</code> or double-click <code>start-server.bat</code>.';
+      'Local file preview detected. Run <code>start-server.bat</code> (or publish to GitHub Pages / a PHP host) so JSON menu data loads without browser file restrictions.';
     document.body.prepend(banner);
   }
 

@@ -26,31 +26,19 @@
   }
 
   async function adminApi(action, options = {}) {
-    const { method = 'GET', body = null, isFormData = false } = options;
-    const url = `api.php?action=${encodeURIComponent(action)}`;
-    const headers = {
-      'X-Admin-Token': adminState.token,
-    };
-    const fetchOpts = { method, headers };
-    if (body !== null) {
-      if (isFormData) {
-        fetchOpts.body = body;
-      } else {
-        headers['Content-Type'] = 'application/json';
-        fetchOpts.body = JSON.stringify(body);
+    try {
+      return await window.AureliaApp.apiRequest(action, {
+        ...options,
+        token: adminState.token,
+      });
+    } catch (err) {
+      if (err && err.status === 401) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        adminState.token = '';
+        showLoginView();
       }
+      throw err;
     }
-    const res = await fetch(url, fetchOpts);
-    const data = await res.json().catch(() => ({}));
-    if (res.status === 401) {
-      sessionStorage.removeItem(TOKEN_KEY);
-      adminState.token = '';
-      showLoginView();
-    }
-    if (!res.ok || data.success === false) {
-      throw new Error(data.error || `Error (${res.status})`);
-    }
-    return data;
   }
 
   function showLoginView() {
