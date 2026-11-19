@@ -71,6 +71,7 @@ $reservationsPath = aurelia_data_path($config, 'reservations.json');
 $logPath          = aurelia_data_path($config, 'inventory_log.json');
 $inquiriesPath    = aurelia_data_path($config, 'inquiries.json');
 $settingsPath     = aurelia_data_path($config, 'settings.json');
+$usersPath        = aurelia_data_path($config, 'users.json');
 
 // ---------------------------------------------------------------------------
 // GET ENDPOINTS
@@ -123,6 +124,35 @@ if ($method === 'GET') {
                 return in_array(strtoupper((string)($r['id'] ?? '')), $wanted, true);
             }));
             json_response(200, ['success' => true, 'reservations' => $matched]);
+
+        case 'customer_portal':
+            $email = strtolower(trim((string)($_GET['email'] ?? '')));
+            $phoneDigits = preg_replace('/\D+/', '', (string)($_GET['phone'] ?? ''));
+            if ($email === '' && $phoneDigits === '') {
+                json_response(400, ['success' => false, 'error' => 'Customer email or phone is required.']);
+            }
+
+            $orders = aurelia_read_json($ordersPath, []);
+            $myOrders = array_values(array_filter($orders, static function ($o) use ($email, $phoneDigits) {
+                $oEmail = strtolower(trim((string)($o['customer']['email'] ?? '')));
+                $oPhone = preg_replace('/\D+/', '', (string)($o['customer']['phone'] ?? ''));
+                return ($email !== '' && $oEmail === $email)
+                    || (strlen($phoneDigits) >= 7 && $oPhone === $phoneDigits);
+            }));
+
+            $reservations = aurelia_read_json($reservationsPath, []);
+            $myReservations = array_values(array_filter($reservations, static function ($r) use ($email, $phoneDigits) {
+                $rEmail = strtolower(trim((string)($r['email'] ?? '')));
+                $rPhone = preg_replace('/\D+/', '', (string)($r['phone'] ?? ''));
+                return ($email !== '' && $rEmail === $email)
+                    || (strlen($phoneDigits) >= 7 && $rPhone === $phoneDigits);
+            }));
+
+            json_response(200, [
+                'success'      => true,
+                'orders'       => $myOrders,
+                'reservations' => $myReservations,
+            ]);
 
         case 'admin_bootstrap':
             require_admin($config);
@@ -819,6 +849,92 @@ if ($method === 'POST') {
 
             aurelia_write_json($settingsPath, $current);
             json_response(200, ['success' => true, 'settings' => aurelia_public_settings($current)]);
+
+        case 'customer_register':
+            $name     = trim((string)($body['name'] ?? ''));
+            $email    = strtolower(trim((string)($body['email'] ?? '')));
+            $phone    = trim((string)($body['phone'] ?? ''));
+            $address  = trim((string)($body['address'] ?? ''));
+            $password = (string)($body['password'] ?? '');
+
+            if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $phone === '') {
+                json_response(400, ['success' => false, 'error' => 'Please enter a valid name, email address, and mobile phone.']);
+            }
+            if (strlen($password) < 6) {
+                json_response(400, ['success' => false, 'error' => 'Password must be at least 6 characters.']);
+            }
+
+            $users = aurelia_read_json($usersPath, []);
+            foreach ($users as $existing) {
+                if (strtolower((string)($existing['email'] ?? '')) === $email) {
+                    json_response(409, ['success' => false, 'error' => 'An account with this email already exists. Please sign in.']);
+                }
+            }
+
+            $newUser = [
+                'id'            => 'USR-' . rand(1000, 9999),
+                'name'          => $name,
+                'email'         => $email,
+                'phone'         => $phone,
+                'address'       => $address,
+                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'created_at'    => gmdate('c'),
+            ];
+            array_unshift($users, $newUser);
+            aurelia_write_json($usersPath, $users);
+
+            json_response(201, ['success' => true, 'user' => aurelia_sanitize_user($newUser)]);
+
+        case 'customer_login':
+            $email    = strtolower(trim((string)($body['email'] ?? '')));
+            $password = (string)($body['password'] ?? '');
+            if ($email === '' || $password === '') {
+                json_response(400, ['success' => false, 'error' => 'Email and password are required.']);
+            }
+
+            $users = aurelia_read_json($usersPath, []);
+            $matchedUser = null;
+            foreach ($users as $u) {
+                if (strtolower((string)($u['email'] ?? '')) === $email) {
+                    $matchedUser = $u;
+                    break;
+                }
+            }
+
+            if ($matchedUser === null || !password_verify($password, (string)($matchedUser['password_hash'] ?? ''))) {
+                json_response(401, ['success' => false, 'error' => 'Incorrect email or password.']);
+            }
+
+            json_response(200, ['success' => true, 'user' => aurelia_sanitize_user($matchedUser)]);
+
+        case 'customer_update':
+            $id      = trim((string)($body['id'] ?? ''));
+            $email   = strtolower(trim((string)($body['email'] ?? '')));
+            $name    = trim((string)($body['name'] ?? ''));
+            $phone   = trim((string)($body['phone'] ?? ''));
+            $address = trim((string)($body['address'] ?? ''));
+
+            if ($name === '' || $phone === '') {
+                json_response(400, ['success' => false, 'error' => 'Name and phone number cannot be empty.']);
+            }
+
+            $users = aurelia_read_json($usersPath, []);
+            $updatedUser = null;
+            foreach ($users as $idx => $u) {
+                if (($id !== '' && (string)($u['id'] ?? '') === $id) || ($email !== '' && strtolower((string)($u['email'] ?? '')) === $email)) {
+                    $users[$idx]['name'] = $name;
+                    $users[$idx]['phone'] = $phone;
+                    $users[$idx]['address'] = $address;
+                    $updatedUser = $users[$idx];
+                    break;
+                }
+            }
+            if ($updatedUser === null) {
+                json_response(404, ['success' => false, 'error' => 'Account not found.']);
+            }
+
+            aurelia_write_json($usersPath, $users);
+            json_response(200, ['success' => true, 'user' => aurelia_sanitize_user($updatedUser)]);
 
         default:
             json_response(400, ['success' => false, 'error' => 'Unknown POST action.']);

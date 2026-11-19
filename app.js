@@ -8,6 +8,7 @@
   const STORAGE_CART_KEY = 'aurelia_cart_v2';
   const STORAGE_ORDERS_KEY = 'aurelia_recent_orders_v2';
   const STORAGE_RES_KEY = 'aurelia_my_reservations_v2';
+  const STORAGE_USER_KEY = 'aurelia_customer_v1';
   const STORAGE_STATIC_DB = 'aurelia_static_db_v1';
   const DEMO_ADMIN_TOKEN = 'aurelia2026';
   let useStaticFallback = window.location.protocol === 'file:';
@@ -40,6 +41,7 @@
       },
     },
     cart: loadJson(STORAGE_CART_KEY, []),
+    customer: loadJson(STORAGE_USER_KEY, null),
     fulfillmentMode: 'pickup',
     promoCode: '',
     promoRate: 0,
@@ -126,16 +128,28 @@
       }
     };
 
-    const [menu, orders, reservations, inventory_log, settings, inquiries] = await Promise.all([
+    const [menu, orders, reservations, inventory_log, settings, inquiries, usersRaw] = await Promise.all([
       fetchStaticJson('data/menu.json', []),
       fetchStaticJson('data/orders.json', []),
       fetchStaticJson('data/reservations.json', []),
       fetchStaticJson('data/inventory_log.json', []),
       fetchStaticJson('data/settings.json', state.settings),
       fetchStaticJson('data/inquiries.json', []),
+      fetchStaticJson('data/users.json', []),
     ]);
 
-    db = { menu, orders, reservations, inventory_log, settings, inquiries };
+    const users = Array.isArray(usersRaw) && usersRaw.length > 0 ? usersRaw : [
+      {
+        id: 'USR-1001',
+        name: 'Sophia Morales',
+        email: 'sophia.m@example.com',
+        phone: '(805) 555-0134',
+        address: '214 Castillo St, Apt 3B, Santa Barbara',
+        created_at: new Date().toISOString(),
+      },
+    ];
+
+    db = { menu, orders, reservations, inventory_log, settings, inquiries, users };
     saveJson(STORAGE_STATIC_DB, db);
     return db;
   }
@@ -174,6 +188,23 @@
           .filter(Boolean);
         const matched = (db.reservations || []).filter((r) => wanted.includes(String(r.id).toUpperCase()));
         return { success: true, reservations: matched };
+      }
+
+      if (action === 'customer_portal') {
+        const email = (params.get('email') || '').trim().toLowerCase();
+        const phoneDigits = (params.get('phone') || '').replace(/\D+/g, '');
+        if (!email && !phoneDigits) throw new Error('Customer email or phone is required.');
+        const orders = (db.orders || []).filter((o) => {
+          const oe = String(o.customer?.email || '').trim().toLowerCase();
+          const op = String(o.customer?.phone || '').replace(/\D+/g, '');
+          return (email && oe === email) || (phoneDigits.length >= 7 && op === phoneDigits);
+        });
+        const reservations = (db.reservations || []).filter((r) => {
+          const re = String(r.email || '').trim().toLowerCase();
+          const rp = String(r.phone || '').replace(/\D+/g, '');
+          return (email && re === email) || (phoneDigits.length >= 7 && rp === phoneDigits);
+        });
+        return { success: true, orders, reservations };
       }
 
       if (action === 'admin_bootstrap') {
@@ -365,6 +396,74 @@
       db.inquiries.unshift(inq);
       saveJson(STORAGE_STATIC_DB, db);
       return { success: true, inquiry: inq };
+    }
+
+    if (action === 'customer_register') {
+      const name = String(payload.name || '').trim();
+      const email = String(payload.email || '').trim().toLowerCase();
+      const phone = String(payload.phone || '').trim();
+      const address = String(payload.address || '').trim();
+      const password = String(payload.password || '');
+      if (!name || !email.includes('@') || !phone) throw new Error('Please enter a valid name, email address, and mobile phone.');
+      if (password.length < 6) throw new Error('Password must be at least 6 characters.');
+      db.users = db.users || [];
+      if (db.users.some((u) => String(u.email || '').toLowerCase() === email)) {
+        throw new Error('An account with this email already exists. Please sign in.');
+      }
+      const userObj = {
+        id: `USR-${Math.floor(1000 + Math.random() * 9000)}`,
+        name,
+        email,
+        phone,
+        address,
+        demo_password: password,
+        created_at: now,
+      };
+      db.users.unshift(userObj);
+      saveJson(STORAGE_STATIC_DB, db);
+      const safe = { ...userObj };
+      delete safe.demo_password;
+      return { success: true, user: safe };
+    }
+
+    if (action === 'customer_login') {
+      const email = String(payload.email || '').trim().toLowerCase();
+      const password = String(payload.password || '');
+      db.users = db.users || [];
+      const found = db.users.find((u) => String(u.email || '').toLowerCase() === email);
+      const validDemo =
+        found &&
+        ((found.demo_password && found.demo_password === password) ||
+          (email === 'sophia.m@example.com' && password === 'coastal2026'));
+      if (!validDemo) {
+        const err = new Error('Incorrect email or password.');
+        err.status = 401;
+        throw err;
+      }
+      const safe = { ...found };
+      delete safe.demo_password;
+      delete safe.password_hash;
+      return { success: true, user: safe };
+    }
+
+    if (action === 'customer_update') {
+      const id = String(payload.id || '').trim();
+      const email = String(payload.email || '').trim().toLowerCase();
+      const name = String(payload.name || '').trim();
+      const phone = String(payload.phone || '').trim();
+      const address = String(payload.address || '').trim();
+      if (!name || !phone) throw new Error('Name and phone number cannot be empty.');
+      db.users = db.users || [];
+      const found = db.users.find((u) => (id && u.id === id) || (email && String(u.email || '').toLowerCase() === email));
+      if (!found) throw new Error('Account not found.');
+      found.name = name;
+      found.phone = phone;
+      found.address = address;
+      saveJson(STORAGE_STATIC_DB, db);
+      const safe = { ...found };
+      delete safe.demo_password;
+      delete safe.password_hash;
+      return { success: true, user: safe };
     }
 
     assertStaticAdmin(token);
@@ -1330,10 +1429,401 @@
     });
   }
 
+  /* ------------------------------------------------------------------------
+     Customer Authentication, Profile & Order/Booking Portal
+     ------------------------------------------------------------------------ */
+  function setLoggedInCustomer(user) {
+    state.customer = user || null;
+    if (user) {
+      saveJson(STORAGE_USER_KEY, user);
+    } else {
+      localStorage.removeItem(STORAGE_USER_KEY);
+    }
+    updateAccountButton();
+    prefillCustomerForms();
+    renderAccountModalView();
+  }
+
+  function updateAccountButton() {
+    const label = document.getElementById('account-btn-label');
+    const btn = document.getElementById('account-open-btn');
+    if (!label || !btn) return;
+    if (state.customer && state.customer.name) {
+      const first = state.customer.name.trim().split(/\s+/)[0];
+      label.textContent = first;
+      btn.classList.add('is-signed-in');
+    } else {
+      label.textContent = 'Sign In';
+      btn.classList.remove('is-signed-in');
+    }
+  }
+
+  function prefillCustomerForms() {
+    const u = state.customer;
+    if (!u) return;
+    const setIfEmpty = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && !el.value.trim() && val) el.value = val;
+    };
+    setIfEmpty('checkout-name', u.name);
+    setIfEmpty('checkout-phone', u.phone);
+    setIfEmpty('checkout-email', u.email);
+    setIfEmpty('delivery-address', u.address);
+    setIfEmpty('res-name', u.name);
+    setIfEmpty('res-phone', u.phone);
+    setIfEmpty('res-email', u.email);
+    setIfEmpty('inq-name', u.name);
+    setIfEmpty('inq-phone', u.phone);
+    setIfEmpty('inq-email', u.email);
+  }
+
+  function mountAccountUI() {
+    const cartBtn = document.getElementById('cart-open-btn');
+    if (!cartBtn) return; // Skip customer login UI on Staff Portal (admin.html)
+
+    if (!document.getElementById('account-open-btn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'account-trigger';
+      btn.id = 'account-open-btn';
+      btn.setAttribute('aria-label', 'Guest account');
+      btn.innerHTML = `
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span id="account-btn-label">Sign In</span>
+      `;
+      cartBtn.parentNode.insertBefore(btn, cartBtn);
+    }
+
+    if (!document.getElementById('account-modal')) {
+      const modalWrap = document.createElement('div');
+      modalWrap.innerHTML = `
+        <div class="modal-backdrop hidden" id="account-modal" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+          <div class="modal-card account-modal-card">
+            <div class="drawer-header" style="padding:0 0 1rem; margin-bottom:1rem;">
+              <div>
+                <p class="eyebrow" style="margin-bottom:0.2rem;">Guest Account</p>
+                <h2 id="account-modal-title" style="font-size:1.75rem;">Sign In or Register</h2>
+              </div>
+              <button type="button" class="icon-close-btn" id="account-close-btn" aria-label="Close guest account">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- Logged Out View -->
+            <div id="account-auth-view">
+              <div class="auth-tabs" id="auth-tabs">
+                <button type="button" class="tab-btn active" data-auth-tab="login">Sign In</button>
+                <button type="button" class="tab-btn" data-auth-tab="register">Create Account</button>
+              </div>
+
+              <form id="guest-login-form" style="margin-top:1rem;">
+                <div class="form-field">
+                  <label for="login-email">Email Address</label>
+                  <input type="email" id="login-email" required placeholder="sophia.m@example.com" />
+                </div>
+                <div class="form-field">
+                  <label for="login-password">Password</label>
+                  <input type="password" id="login-password" required placeholder="Enter password" />
+                </div>
+                <p class="form-error hidden" id="login-error"></p>
+                <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+                <button type="button" class="btn btn-outline btn-sm btn-full" id="fill-demo-guest-btn" style="margin-top:0.6rem;">
+                  Demo Guest: Sophia Morales (sophia.m@example.com)
+                </button>
+              </form>
+
+              <form id="guest-register-form" class="hidden" style="margin-top:1rem;">
+                <div class="form-row">
+                  <div class="form-field">
+                    <label for="reg-name">Full Name *</label>
+                    <input type="text" id="reg-name" required placeholder="Elena Costa" />
+                  </div>
+                  <div class="form-field">
+                    <label for="reg-phone">Mobile Phone *</label>
+                    <input type="tel" id="reg-phone" required placeholder="(805) 555-0190" />
+                  </div>
+                </div>
+                <div class="form-field">
+                  <label for="reg-email">Email Address *</label>
+                  <input type="email" id="reg-email" required placeholder="elena@example.com" />
+                </div>
+                <div class="form-field">
+                  <label for="reg-address">Default Delivery Address (Optional)</label>
+                  <input type="text" id="reg-address" placeholder="Street address, apt/suite" />
+                </div>
+                <div class="form-field">
+                  <label for="reg-password">Password (min 6 characters) *</label>
+                  <input type="password" id="reg-password" minlength="6" required placeholder="Create password" />
+                </div>
+                <p class="form-error hidden" id="register-error"></p>
+                <button type="submit" class="btn btn-primary btn-full">Create Guest Account</button>
+              </form>
+            </div>
+
+            <!-- Logged In View -->
+            <div id="account-portal-view" class="hidden">
+              <div class="auth-tabs" id="portal-tabs">
+                <button type="button" class="tab-btn active" data-portal-tab="profile">Profile</button>
+                <button type="button" class="tab-btn" data-portal-tab="orders">My Orders</button>
+                <button type="button" class="tab-btn" data-portal-tab="bookings">My Bookings</button>
+              </div>
+
+              <div id="portal-panel-profile" class="portal-panel" style="margin-top:1rem;">
+                <form id="guest-profile-form">
+                  <div class="form-field">
+                    <label for="prof-name">Full Name</label>
+                    <input type="text" id="prof-name" required />
+                  </div>
+                  <div class="form-row">
+                    <div class="form-field">
+                      <label for="prof-phone">Mobile Phone</label>
+                      <input type="tel" id="prof-phone" required />
+                    </div>
+                    <div class="form-field">
+                      <label for="prof-email">Email</label>
+                      <input type="email" id="prof-email" disabled />
+                    </div>
+                  </div>
+                  <div class="form-field">
+                    <label for="prof-address">Saved Delivery Address</label>
+                    <input type="text" id="prof-address" placeholder="Street address, apt/suite" />
+                  </div>
+                  <div style="display:flex; gap:0.65rem; flex-wrap:wrap;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="flex:1;">Save Profile</button>
+                    <button type="button" class="btn btn-danger-outline btn-sm" id="guest-logout-btn">Sign Out</button>
+                  </div>
+                </form>
+              </div>
+
+              <div id="portal-panel-orders" class="portal-panel hidden" style="margin-top:1rem;">
+                <div id="guest-orders-list" class="portal-history-list"></div>
+              </div>
+
+              <div id="portal-panel-bookings" class="portal-panel hidden" style="margin-top:1rem;">
+                <div id="guest-bookings-list" class="portal-history-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modalWrap);
+    }
+
+    bindAccountEvents();
+    updateAccountButton();
+    prefillCustomerForms();
+  }
+
+  function openAccountModal() {
+    const modal = document.getElementById('account-modal');
+    if (!modal) return;
+    renderAccountModalView();
+    modal.classList.remove('hidden');
+    if (state.customer) {
+      loadCustomerPortal();
+    }
+  }
+
+  function closeAccountModal() {
+    document.getElementById('account-modal')?.classList.add('hidden');
+  }
+
+  function renderAccountModalView() {
+    const title = document.getElementById('account-modal-title');
+    const authView = document.getElementById('account-auth-view');
+    const portalView = document.getElementById('account-portal-view');
+    if (!authView || !portalView) return;
+
+    if (state.customer) {
+      if (title) title.textContent = `Welcome, ${state.customer.name}`;
+      authView.classList.add('hidden');
+      portalView.classList.remove('hidden');
+      document.getElementById('prof-name').value = state.customer.name || '';
+      document.getElementById('prof-phone').value = state.customer.phone || '';
+      document.getElementById('prof-email').value = state.customer.email || '';
+      document.getElementById('prof-address').value = state.customer.address || '';
+    } else {
+      if (title) title.textContent = 'Sign In or Register';
+      authView.classList.remove('hidden');
+      portalView.classList.add('hidden');
+    }
+  }
+
+  async function loadCustomerPortal() {
+    const u = state.customer;
+    const ordersEl = document.getElementById('guest-orders-list');
+    const bookingsEl = document.getElementById('guest-bookings-list');
+    if (!u || !ordersEl || !bookingsEl) return;
+
+    ordersEl.innerHTML = '<p style="color:var(--text-muted); font-size:0.88rem;">Loading orders...</p>';
+    bookingsEl.innerHTML = '<p style="color:var(--text-muted); font-size:0.88rem;">Loading bookings...</p>';
+
+    try {
+      const data = await apiRequest(
+        `customer_portal&email=${encodeURIComponent(u.email || '')}&phone=${encodeURIComponent(u.phone || '')}`
+      );
+      const orders = data.orders || [];
+      const reservations = data.reservations || [];
+
+      if (orders.length === 0) {
+        ordersEl.innerHTML = '<p style="color:var(--text-muted); font-size:0.88rem;">No orders found for this account yet.</p>';
+      } else {
+        ordersEl.innerHTML = orders
+          .map(
+            (o) => `
+          <div class="saved-res-card">
+            <div class="saved-res-top">
+              <strong>${escapeHtml(o.id)} · ${money(o.pricing?.total)}</strong>
+              <span class="badge">${escapeHtml(String(o.status || '').replace(/_/g, ' '))}</span>
+            </div>
+            <div style="font-size:0.83rem; color:var(--text-muted); margin-bottom:0.55rem;">
+              ${(o.items || []).map((i) => `${i.qty}x ${escapeHtml(i.name)}`).join(', ')}
+            </div>
+            <a href="track.html?id=${encodeURIComponent(o.id)}" class="btn btn-outline btn-xs">Track Delivery Roadmap</a>
+          </div>`
+          )
+          .join('');
+      }
+
+      if (reservations.length === 0) {
+        bookingsEl.innerHTML = '<p style="color:var(--text-muted); font-size:0.88rem;">No table reservations found for this account yet.</p>';
+      } else {
+        bookingsEl.innerHTML = reservations
+          .map(
+            (r) => `
+          <div class="saved-res-card">
+            <div class="saved-res-top">
+              <strong>${escapeHtml(r.id)} · ${escapeHtml(r.date)} at ${escapeHtml(r.time)}</strong>
+              <span class="badge badge-olive">${escapeHtml(r.status)}</span>
+            </div>
+            <div style="font-size:0.83rem; color:var(--text-muted);">
+              ${escapeHtml(r.guests)} Guests · ${escapeHtml(r.seating)}
+            </div>
+          </div>`
+          )
+          .join('');
+      }
+    } catch (err) {
+      ordersEl.innerHTML = `<p style="color:var(--danger); font-size:0.86rem;">${escapeHtml(err.message)}</p>`;
+      bookingsEl.innerHTML = '';
+    }
+  }
+
+  function bindAccountEvents() {
+    document.getElementById('account-open-btn')?.addEventListener('click', openAccountModal);
+    document.getElementById('account-close-btn')?.addEventListener('click', closeAccountModal);
+    document.getElementById('account-modal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'account-modal') closeAccountModal();
+    });
+
+    document.querySelectorAll('#auth-tabs [data-auth-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const mode = btn.dataset.authTab;
+        document.querySelectorAll('#auth-tabs [data-auth-tab]').forEach((b) => b.classList.toggle('active', b === btn));
+        document.getElementById('guest-login-form')?.classList.toggle('hidden', mode !== 'login');
+        document.getElementById('guest-register-form')?.classList.toggle('hidden', mode !== 'register');
+      });
+    });
+
+    document.querySelectorAll('#portal-tabs [data-portal-tab]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.portalTab;
+        document.querySelectorAll('#portal-tabs [data-portal-tab]').forEach((b) => b.classList.toggle('active', b === btn));
+        document.querySelectorAll('.portal-panel').forEach((p) => {
+          p.classList.toggle('hidden', p.id !== `portal-panel-${tab}`);
+        });
+        if (tab === 'orders' || tab === 'bookings') loadCustomerPortal();
+      });
+    });
+
+    document.getElementById('fill-demo-guest-btn')?.addEventListener('click', () => {
+      document.getElementById('login-email').value = 'sophia.m@example.com';
+      document.getElementById('login-password').value = 'coastal2026';
+    });
+
+    document.getElementById('guest-login-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('login-error');
+      errEl.classList.add('hidden');
+      try {
+        const res = await apiRequest('customer_login', {
+          method: 'POST',
+          body: {
+            email: document.getElementById('login-email').value.trim(),
+            password: document.getElementById('login-password').value,
+          },
+        });
+        setLoggedInCustomer(res.user);
+        loadCustomerPortal();
+        showToast(`Signed in as ${res.user.name}`);
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('guest-register-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('register-error');
+      errEl.classList.add('hidden');
+      try {
+        const res = await apiRequest('customer_register', {
+          method: 'POST',
+          body: {
+            name: document.getElementById('reg-name').value.trim(),
+            phone: document.getElementById('reg-phone').value.trim(),
+            email: document.getElementById('reg-email').value.trim(),
+            address: document.getElementById('reg-address').value.trim(),
+            password: document.getElementById('reg-password').value,
+          },
+        });
+        setLoggedInCustomer(res.user);
+        loadCustomerPortal();
+        showToast(`Account created for ${res.user.name}`);
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('guest-profile-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!state.customer) return;
+      try {
+        const res = await apiRequest('customer_update', {
+          method: 'POST',
+          body: {
+            id: state.customer.id,
+            email: state.customer.email,
+            name: document.getElementById('prof-name').value.trim(),
+            phone: document.getElementById('prof-phone').value.trim(),
+            address: document.getElementById('prof-address').value.trim(),
+          },
+        });
+        setLoggedInCustomer(res.user);
+        showToast('Profile saved');
+      } catch (err) {
+        showToast(err.message);
+      }
+    });
+
+    document.getElementById('guest-logout-btn')?.addEventListener('click', () => {
+      setLoggedInCustomer(null);
+      closeAccountModal();
+      showToast('Signed out');
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     checkFileProtocol();
     initNavigation();
     mountCartUI();
+    mountAccountUI();
     bindCartEvents();
     initMenuFilters();
     initReservationsPage();

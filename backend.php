@@ -23,6 +23,7 @@ function aurelia_init_store(array $config): void
         'reservations.json'  => aurelia_seed_reservations(),
         'inventory_log.json' => aurelia_seed_inventory_log(),
         'inquiries.json'     => [],
+        'users.json'         => aurelia_seed_users(),
     ];
 
     foreach ($seedFiles as $filename => $defaultData) {
@@ -586,6 +587,27 @@ function aurelia_seed_inventory_log(): array
             'new_stock' => 10,
             'reason'    => 'Order Deduction',
             'reference' => 'AUR-1002',
+        ],
+    ];
+}
+
+function aurelia_sanitize_user(array $user): array
+{
+    unset($user['password_hash']);
+    return $user;
+}
+
+function aurelia_seed_users(): array
+{
+    return [
+        [
+            'id'            => 'USR-1001',
+            'name'          => 'Sophia Morales',
+            'email'         => 'sophia.m@example.com',
+            'phone'         => '(805) 555-0134',
+            'address'       => '214 Castillo St, Apt 3B, Santa Barbara',
+            'password_hash' => password_hash('coastal2026', PASSWORD_DEFAULT),
+            'created_at'    => gmdate('c', time() - 86400),
         ],
     ];
 }
