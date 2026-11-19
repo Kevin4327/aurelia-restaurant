@@ -1,0 +1,11 @@
+[
+    {
+        "id": "USR-1001",
+        "name": "Sophia Morales",
+        "email": "sophia.m@example.com",
+        "phone": "(805) 555-0134",
+        "address": "214 Castillo St, Apt 3B, Santa Barbara",
+        "password_hash": "$2y$12$mGSip32iQYDkVkts4q1YbeJgYym3aNJXVL8/BbjBXG6p7hRFfp.N2",
+        "created_at": "2026-11-18T13:01:42+00:00"
+    }
+]
